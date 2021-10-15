@@ -26,8 +26,4 @@ class profileViewController: UIViewController {
         emailLabel.text = email
         usernameLabel.text = username
     }
-    
-
- 
-
 }

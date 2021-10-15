@@ -138,7 +138,7 @@
         <!--contact details-->
         <scene sceneID="WXw-XH-ze2">
             <objects>
-                <viewController id="VEr-jq-ihh" customClass="contactDetailsVC" customModule="CoreDataDemo" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="contactDetailsVC" id="VEr-jq-ihh" customClass="contactDetailsVC" customModule="CoreDataDemo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Fxe-6r-KUu">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -220,6 +220,7 @@
                     <navigationItem key="navigationItem" title="contact details" id="f1s-2e-Uks"/>
                     <connections>
                         <outlet property="NametextField" destination="Vmx-mg-V9i" id="NLx-LE-oS3"/>
+                        <outlet property="RegisterButton" destination="RqD-rD-YPa" id="c9D-0r-GWw"/>
                         <outlet property="emailTextfield" destination="RKL-Lz-slp" id="MWt-Rc-act"/>
                         <outlet property="phoneTextfield" destination="u8B-Vg-jts" id="Zvs-6e-YNn"/>
                     </connections>
