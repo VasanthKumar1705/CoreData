@@ -31,11 +31,11 @@ class contactDetailsVC: UIViewController {
         if (NametextField.hasText && emailTextfield.hasText && phoneTextfield.hasText){
             print("all fields are filled")
             createItem(name: NametextField.text ?? "no value", phone: phoneTextfield.text ?? "no value", email: emailTextfield.text ?? "no value")
+            _ = navigationController?.popViewController(animated: true)
         }else{
             print("please fill the field")
             Toast.show(message: "please fill all the fields", controller: self)
         }
-        _ = navigationController?.popViewController(animated: true)
     }
         
     func createItem(name:String,phone:String,email:String){

@@ -185,6 +185,7 @@ extension ViewController : NSFetchedResultsControllerDelegate{
                userDataTableView.deleteRows(at: [indexPath!], with: .fade )
            case.insert:
                userDataTableView.insertRows(at: [newIndexPath!] , with: .fade)
+               let a = fetchedResultsController.object(at: newIndexPath!).name
            case .update:
                 self.userDataTableView.reloadRows(at: [indexPath!], with: .fade)
            case .move:
