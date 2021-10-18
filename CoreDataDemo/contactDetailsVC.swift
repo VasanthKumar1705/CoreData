@@ -16,7 +16,8 @@ class contactDetailsVC: UIViewController {
     @IBOutlet weak var phoneTextfield: UITextField!
     @IBOutlet weak var emailTextfield: UITextField!
     @IBOutlet weak var NametextField: UITextField!
-  
+    var getDataTitles : [String] = []
+
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,7 +43,6 @@ class contactDetailsVC: UIViewController {
         newItem.name = name
         newItem.phone = phone
         newItem.email = email
-        
         do{
             try context.save()
             

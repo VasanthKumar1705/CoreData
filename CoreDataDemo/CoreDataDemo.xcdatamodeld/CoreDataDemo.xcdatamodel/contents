@@ -8,8 +8,8 @@
         <attribute name="phone" optional="YES" attributeType="String"/>
     </entity>
     <elements>
-        <element name="User" positionX="-63" positionY="-18" width="128" height="74"/>
         <element name="Entity" positionX="-54" positionY="18" width="128" height="29"/>
         <element name="Entity1" positionX="-36" positionY="27" width="128" height="29"/>
+        <element name="User" positionX="-63" positionY="-18" width="128" height="74"/>
     </elements>
 </model>

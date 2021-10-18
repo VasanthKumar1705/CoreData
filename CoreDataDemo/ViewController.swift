@@ -15,6 +15,13 @@ class ViewController: UIViewController {
     var MyData = [User]()
     var getDataTitles : [String] = []
     var getDataDictionary = [String : [String]]()
+    fileprivate lazy var fetchedResultsController: NSFetchedResultsController<User> = {
+            let fetchRequest : NSFetchRequest =  User.fetchRequest()
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+            let fetchedResultsContoller = NSFetchedResultsController.init(fetchRequest: fetchRequest, managedObjectContext:  context , sectionNameKeyPath: nil, cacheName: nil)
+            fetchedResultsContoller.delegate = self
+            return fetchedResultsContoller
+      }()
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -22,8 +29,12 @@ class ViewController: UIViewController {
         self.userDataTableView.dataSource = self
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        getDetails()
+        
+    }
     override func viewDidAppear(_ animated: Bool) {
-        getAllItem()
+//        getAllItem()
     }
     @IBAction func AddButtonTapped(_ sender: Any) {
         self.performSegue(withIdentifier: "go", sender: nil)
@@ -41,12 +52,12 @@ class ViewController: UIViewController {
             print("error")
         }
     }
-    
+  
     func deleteItem(item:User){
         context.delete(item)
         do{
             try context.save()
-            getAllItem()
+//            getAllItem()
         }
         catch {
             print("error")
@@ -59,7 +70,7 @@ class ViewController: UIViewController {
         item.email = newEmail
         do{
             try context.save()
-            getAllItem()
+//            getAllItem()
         }
         catch {
             print("error")
@@ -67,20 +78,22 @@ class ViewController: UIViewController {
     }
 }
 extension ViewController : UITableViewDelegate,UITableViewDataSource{
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return MyData.count
+        let sections = self.fetchedResultsController.sections!
+        let sectionInfo = sections[section]
+        return sectionInfo.numberOfObjects
     }
-
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = self.userDataTableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! customTableViewCell
-        cell.nameLabel.text = MyData[indexPath.row].name
+        cell.nameLabel.text = fetchedResultsController.object(at: indexPath).name//MyData[indexPath.row].name
         return cell
     }
 
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc = storyboard?.instantiateViewController(withIdentifier: "profileVC") as? profileViewController
-                let dta = MyData[indexPath.row]
+                let dta = fetchedResultsController.object(at: indexPath)//MyData[indexPath.row]
                 vc?.username = (dta.value(forKey: "name") as! String)
                 vc?.email = (dta.value(forKey: "email") as! String)
                 vc?.phone = (dta.value(forKey: "phone") as! String)
@@ -89,11 +102,11 @@ extension ViewController : UITableViewDelegate,UITableViewDataSource{
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
 
-        let dta = self.MyData[indexPath.row]
+        let dta = fetchedResultsController.object(at: indexPath)//self.MyData[indexPath.row]
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, handler) in
             print("Delete Action Tapped")
             self.deleteItem(item: dta)
-            tableView.deleteRows(at: [indexPath], with: .fade)
+//            tableView.deleteRows(at: [indexPath], with: .fade)
         }
         deleteAction.backgroundColor = .red
         let editAction = UIContextualAction(style: .normal, title: "Edit") { (action, view, handler) in
@@ -133,4 +146,57 @@ extension ViewController : UITableViewDelegate,UITableViewDataSource{
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction ,editAction])
         return configuration
     }
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+         if (self.fetchedResultsController.sections != nil){
+            return (self.fetchedResultsController.sections?.count)!
+            }
+            return 0
+    }
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+           guard let sectionInfo = fetchedResultsController.sections?[section] else {
+               return nil
+           }
+           return sectionInfo.name
+    }
+    func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+        return self.fetchedResultsController.section(forSectionIndexTitle: title, at: index)
+    }
+    func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+       return fetchedResultsController.sectionIndexTitles
+    }
+    
+}
+
+extension ViewController : NSFetchedResultsControllerDelegate{
+    func getDetails()  {
+            do {
+                try self.fetchedResultsController.performFetch()
+            } catch let error {
+                print("Error",error)
+            }
+        }
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+           userDataTableView.beginUpdates()
+       }
+       
+       func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+           switch type {
+           case .delete:
+               userDataTableView.deleteRows(at: [indexPath!], with: .fade )
+           case.insert:
+               userDataTableView.insertRows(at: [newIndexPath!] , with: .fade)
+           case .update:
+                self.userDataTableView.reloadRows(at: [indexPath!], with: .fade)
+           case .move:
+               self.userDataTableView.deleteRows(at: [indexPath!], with: .fade)
+               self.userDataTableView.insertRows(at: [newIndexPath!], with: .fade)
+               break
+           default:
+               print("default")
+           }
+       }
+       
+       func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+           userDataTableView.endUpdates()
+       }
 }
