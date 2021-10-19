@@ -12,13 +12,13 @@ class ViewController: UIViewController {
     
     @IBOutlet var userDataTableView: UITableView!
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    var MyData = [User]()
-    var getDataTitles : [String] = []
-    var getDataDictionary = [String : [String]]()
+//    var MyData = [User]()
+//    var getDataTitles : [String] = []
+//    var getDataDictionary = [String : [String]]()
     fileprivate lazy var fetchedResultsController: NSFetchedResultsController<User> = {
             let fetchRequest : NSFetchRequest =  User.fetchRequest()
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-            let fetchedResultsContoller = NSFetchedResultsController.init(fetchRequest: fetchRequest, managedObjectContext:  context , sectionNameKeyPath: nil, cacheName: nil)
+            let fetchedResultsContoller = NSFetchedResultsController.init(fetchRequest: fetchRequest, managedObjectContext:  context , sectionNameKeyPath: "name", cacheName: nil)
             fetchedResultsContoller.delegate = self
             return fetchedResultsContoller
       }()
@@ -27,6 +27,8 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         self.userDataTableView.delegate = self
         self.userDataTableView.dataSource = self
+        
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -41,17 +43,17 @@ class ViewController: UIViewController {
     }
 
     // coreData
-    func getAllItem(){
-        do {
-             MyData = try context.fetch(User.fetchRequest())
-             DispatchQueue.main.async {
-                self.userDataTableView.reloadData()
-             }
-        }
-        catch {
-            print("error")
-        }
-    }
+//    func getAllItem(){
+//        do {
+//             MyData = try context.fetch(User.fetchRequest())
+//             DispatchQueue.main.async {
+//                self.userDataTableView.reloadData()
+//             }
+//        }
+//        catch {
+//            print("error")
+//        }
+//    }
   
     func deleteItem(item:User){
         context.delete(item)
@@ -79,8 +81,10 @@ class ViewController: UIViewController {
 }
 extension ViewController : UITableViewDelegate,UITableViewDataSource{
     
+   
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sections = self.fetchedResultsController.sections!
+        print("sections----->" ,sections.count)
         let sectionInfo = sections[section]
         return sectionInfo.numberOfObjects
     }
@@ -146,18 +150,21 @@ extension ViewController : UITableViewDelegate,UITableViewDataSource{
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction ,editAction])
         return configuration
     }
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-         if (self.fetchedResultsController.sections != nil){
+    func numberOfSections(in tableView: UITableView) -> Int {
+        if (self.fetchedResultsController.sections != nil){
+            print(self.fetchedResultsController.sections!.count)
             return (self.fetchedResultsController.sections?.count)!
-            }
-            return 0
+
+           }
+           return 0
     }
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
            guard let sectionInfo = fetchedResultsController.sections?[section] else {
                return nil
            }
-           return sectionInfo.name
+        return sectionInfo.indexTitle
     }
+    
     func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
         return self.fetchedResultsController.section(forSectionIndexTitle: title, at: index)
     }
@@ -174,7 +181,7 @@ extension ViewController : NSFetchedResultsControllerDelegate{
             } catch let error {
                 print("Error",error)
             }
-        }
+    }
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
            userDataTableView.beginUpdates()
        }
@@ -185,7 +192,6 @@ extension ViewController : NSFetchedResultsControllerDelegate{
                userDataTableView.deleteRows(at: [indexPath!], with: .fade )
            case.insert:
                userDataTableView.insertRows(at: [newIndexPath!] , with: .fade)
-               let a = fetchedResultsController.object(at: newIndexPath!).name
            case .update:
                 self.userDataTableView.reloadRows(at: [indexPath!], with: .fade)
            case .move:
@@ -200,4 +206,18 @@ extension ViewController : NSFetchedResultsControllerDelegate{
        func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
            userDataTableView.endUpdates()
        }
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange sectionInfo: NSFetchedResultsSectionInfo,atSectionIndex sectionIndex: Int,for type: NSFetchedResultsChangeType) {
+
+        let section = IndexSet(integer: sectionIndex)
+
+        switch type {
+            case .delete:
+                 userDataTableView.deleteSections(section, with: .automatic)
+            case .insert:
+                 userDataTableView.insertSections(section, with: .automatic)
+       
+        default:
+            print("default")
+        }
+    }
 }
