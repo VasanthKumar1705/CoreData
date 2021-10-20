@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6A1783EF271FD34300B00D28 /* CoreDataAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A1783EE271FD34300B00D28 /* CoreDataAccess.swift */; };
 		6A5CB6E02716B3F90072B991 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A5CB6DF2716B3F90072B991 /* AppDelegate.swift */; };
 		6A5CB6E22716B3F90072B991 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A5CB6E12716B3F90072B991 /* SceneDelegate.swift */; };
 		6A5CB6E42716B3F90072B991 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A5CB6E32716B3F90072B991 /* ViewController.swift */; };
@@ -41,6 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6A1783EE271FD34300B00D28 /* CoreDataAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataAccess.swift; sourceTree = "<group>"; };
 		6A5CB6DC2716B3F90072B991 /* CoreDataDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreDataDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A5CB6DF2716B3F90072B991 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6A5CB6E12716B3F90072B991 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				6A5CB6DF2716B3F90072B991 /* AppDelegate.swift */,
 				6A5CB6E12716B3F90072B991 /* SceneDelegate.swift */,
 				6A5CB6E32716B3F90072B991 /* ViewController.swift */,
+				6A1783EE271FD34300B00D28 /* CoreDataAccess.swift */,
 				6A5CB7182716FF2E0072B991 /* Toast.swift */,
 				6A5CB6E52716B3F90072B991 /* Main.storyboard */,
 				6A5CB71A271706C00072B991 /* profileViewController.swift */,
@@ -275,6 +278,7 @@
 			files = (
 				6A5CB6E42716B3F90072B991 /* ViewController.swift in Sources */,
 				6A5CB6EA2716B3F90072B991 /* CoreDataDemo.xcdatamodeld in Sources */,
+				6A1783EF271FD34300B00D28 /* CoreDataAccess.swift in Sources */,
 				6A5CB7172716C33A0072B991 /* customTableViewCell.swift in Sources */,
 				6A5CB6E02716B3F90072B991 /* AppDelegate.swift in Sources */,
 				6A5CB6E22716B3F90072B991 /* SceneDelegate.swift in Sources */,

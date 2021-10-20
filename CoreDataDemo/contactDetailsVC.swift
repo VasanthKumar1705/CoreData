@@ -16,9 +16,7 @@ class contactDetailsVC: UIViewController {
     @IBOutlet weak var phoneTextfield: UITextField!
     @IBOutlet weak var emailTextfield: UITextField!
     @IBOutlet weak var NametextField: UITextField!
-    var getDataTitles : [String] = []
 
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -30,7 +28,7 @@ class contactDetailsVC: UIViewController {
     @IBAction func RegisterButtonTapped(_ sender: Any) {
         if (NametextField.hasText && emailTextfield.hasText && phoneTextfield.hasText){
             print("all fields are filled")
-            createItem(name: NametextField.text ?? "no value", phone: phoneTextfield.text ?? "no value", email: emailTextfield.text ?? "no value")
+            CoreDataAccess.shared.createItem(name: NametextField.text ?? "", phone: phoneTextfield.text ?? "", email: emailTextfield.text ?? "")
             _ = navigationController?.popViewController(animated: true)
         }else{
             print("please fill the field")
@@ -38,17 +36,4 @@ class contactDetailsVC: UIViewController {
         }
     }
         
-    func createItem(name:String,phone:String,email:String){
-        let newItem = User(context: context)
-        newItem.name = name
-        newItem.phone = phone
-        newItem.email = email
-        do{
-            try context.save()
-            
-        }
-        catch {
-            print("error")
-        }
-    }
 }

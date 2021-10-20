@@ -11,14 +11,11 @@ import CoreData
 class ViewController: UIViewController {
     
     @IBOutlet var userDataTableView: UITableView!
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-//    var MyData = [User]()
-//    var getDataTitles : [String] = []
-//    var getDataDictionary = [String : [String]]()
+//    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     fileprivate lazy var fetchedResultsController: NSFetchedResultsController<User> = {
             let fetchRequest : NSFetchRequest =  User.fetchRequest()
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-            let fetchedResultsContoller = NSFetchedResultsController.init(fetchRequest: fetchRequest, managedObjectContext:  context , sectionNameKeyPath: "name", cacheName: nil)
+        let fetchedResultsContoller = NSFetchedResultsController.init(fetchRequest: fetchRequest, managedObjectContext:  CoreDataAccess.shared.context , sectionNameKeyPath: "name", cacheName: nil)
             fetchedResultsContoller.delegate = self
             return fetchedResultsContoller
       }()
@@ -27,90 +24,59 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         self.userDataTableView.delegate = self
         self.userDataTableView.dataSource = self
-        
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        getDetails()
-        
-    }
-    override func viewDidAppear(_ animated: Bool) {
-//        getAllItem()
+        self.getAllItems()
     }
     @IBAction func AddButtonTapped(_ sender: Any) {
         self.performSegue(withIdentifier: "go", sender: nil)
     }
 
-    // coreData
-//    func getAllItem(){
-//        do {
-//             MyData = try context.fetch(User.fetchRequest())
-//             DispatchQueue.main.async {
-//                self.userDataTableView.reloadData()
-//             }
-//        }
-//        catch {
-//            print("error")
-//        }
-//    }
-  
-    func deleteItem(item:User){
-        context.delete(item)
-        do{
-            try context.save()
-//            getAllItem()
-        }
-        catch {
-            print("error")
-        }
-    }
-    
-    func UpdateTime(item:User,newName:String,newPhone:String,newEmail:String){
-        item.name = newName
-        item.phone = newPhone
-        item.email = newEmail
-        do{
-            try context.save()
-//            getAllItem()
-        }
-        catch {
-            print("error")
-        }
+    func getAllItems()  {
+            do {
+                try self.fetchedResultsController.performFetch()
+               
+            } catch let error {
+                print("Error",error)
+            }
     }
 }
 extension ViewController : UITableViewDelegate,UITableViewDataSource{
     
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return self.fetchedResultsController.sections?.count ?? 0
+    }
    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let sections = self.fetchedResultsController.sections!
-        print("sections----->" ,sections.count)
+        guard let sections = self.fetchedResultsController.sections else { return 0 }
         let sectionInfo = sections[section]
         return sectionInfo.numberOfObjects
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = self.userDataTableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! customTableViewCell
-        cell.nameLabel.text = fetchedResultsController.object(at: indexPath).name//MyData[indexPath.row].name
+        guard let cell = self.userDataTableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? customTableViewCell else {
+            fatalError("Unexpected indexpath!!")
+        }
+        cell.nameLabel.text = fetchedResultsController.object(at: indexPath).name
         return cell
     }
 
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let vc = storyboard?.instantiateViewController(withIdentifier: "profileVC") as? profileViewController
-                let dta = fetchedResultsController.object(at: indexPath)//MyData[indexPath.row]
-                vc?.username = (dta.value(forKey: "name") as! String)
-                vc?.email = (dta.value(forKey: "email") as! String)
-                vc?.phone = (dta.value(forKey: "phone") as! String)
-                navigationController?.pushViewController(vc!, animated: true)
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "profileVC") as? profileViewController {
+            let dta = fetchedResultsController.object(at: indexPath)
+            vc.username = (dta.value(forKey: "name") as! String)
+            vc.email = (dta.value(forKey: "email") as! String)
+            vc.phone = (dta.value(forKey: "phone") as! String)
+            navigationController?.pushViewController(vc, animated: true)
+        }
     }
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        
 
-        let dta = fetchedResultsController.object(at: indexPath)//self.MyData[indexPath.row]
+        let dta = fetchedResultsController.object(at: indexPath)
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, handler) in
             print("Delete Action Tapped")
-            self.deleteItem(item: dta)
-//            tableView.deleteRows(at: [indexPath], with: .fade)
+            CoreDataAccess.shared.deleteItem(item: dta)
         }
         deleteAction.backgroundColor = .red
         let editAction = UIContextualAction(style: .normal, title: "Edit") { (action, view, handler) in
@@ -135,7 +101,7 @@ extension ViewController : UITableViewDelegate,UITableViewDataSource{
                 let emailTextField = alertController.textFields![1] as UITextField
                 let phoneTextField = alertController.textFields![2] as UITextField
 
-                self.UpdateTime(item: dta, newName: nameTextField.text ?? "", newPhone: phoneTextField.text ?? "", newEmail: emailTextField.text ?? "")
+                CoreDataAccess.shared.UpdateTime(item: dta, newName: nameTextField.text ?? "", newPhone: phoneTextField.text ?? "", newEmail: emailTextField.text ?? "")
                 Toast.show(message: "Record update succesfully", controller: self)
             })
 
@@ -150,14 +116,7 @@ extension ViewController : UITableViewDelegate,UITableViewDataSource{
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction ,editAction])
         return configuration
     }
-    func numberOfSections(in tableView: UITableView) -> Int {
-        if (self.fetchedResultsController.sections != nil){
-            print(self.fetchedResultsController.sections!.count)
-            return (self.fetchedResultsController.sections?.count)!
 
-           }
-           return 0
-    }
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
            guard let sectionInfo = fetchedResultsController.sections?[section] else {
                return nil
@@ -175,28 +134,24 @@ extension ViewController : UITableViewDelegate,UITableViewDataSource{
 }
 
 extension ViewController : NSFetchedResultsControllerDelegate{
-    func getDetails()  {
-            do {
-                try self.fetchedResultsController.performFetch()
-            } catch let error {
-                print("Error",error)
-            }
-    }
+
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-           userDataTableView.beginUpdates()
-       }
+        self.userDataTableView.beginUpdates()
+    }
        
        func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+           guard let indexPath = indexPath else { return }
+           guard let newIndexPath = newIndexPath else { return }
            switch type {
            case .delete:
-               userDataTableView.deleteRows(at: [indexPath!], with: .fade )
+               self.userDataTableView.deleteRows(at: [indexPath], with: .fade )
            case.insert:
-               userDataTableView.insertRows(at: [newIndexPath!] , with: .fade)
+               self.userDataTableView.insertRows(at: [newIndexPath] , with: .fade)
            case .update:
-                self.userDataTableView.reloadRows(at: [indexPath!], with: .fade)
+               self.userDataTableView.reloadRows(at: [indexPath], with: .fade)
            case .move:
-               self.userDataTableView.deleteRows(at: [indexPath!], with: .fade)
-               self.userDataTableView.insertRows(at: [newIndexPath!], with: .fade)
+               self.userDataTableView.deleteRows(at: [indexPath], with: .fade)
+               self.userDataTableView.insertRows(at: [newIndexPath], with: .fade)
                break
            default:
                print("default")
@@ -204,18 +159,15 @@ extension ViewController : NSFetchedResultsControllerDelegate{
        }
        
        func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-           userDataTableView.endUpdates()
+           self.userDataTableView.endUpdates()
        }
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange sectionInfo: NSFetchedResultsSectionInfo,atSectionIndex sectionIndex: Int,for type: NSFetchedResultsChangeType) {
-
         let section = IndexSet(integer: sectionIndex)
-
         switch type {
             case .delete:
-                 userDataTableView.deleteSections(section, with: .automatic)
+                  self.userDataTableView.deleteSections(section, with: .automatic)
             case .insert:
-                 userDataTableView.insertSections(section, with: .automatic)
-       
+                  self.userDataTableView.insertSections(section, with: .automatic)
         default:
             print("default")
         }
